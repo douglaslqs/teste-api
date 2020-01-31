@@ -54,6 +54,15 @@ return [
                     ],
                 ],
             ],
+            'test_api.rest.company' => [
+                'type' => 'Segment',
+                'options' => [
+                    'route' => '/company[/:company_id]',
+                    'defaults' => [
+                        'controller' => 'test_api\\V1\\Rest\\Company\\Controller',
+                    ],
+                ],
+            ],
             'test_api.rpc.user-posts' => [
                 'type' => 'Segment',
                 'options' => [
@@ -61,15 +70,6 @@ return [
                     'defaults' => [
                         'controller' => 'test_api\\V1\\Rpc\\UserPosts\\Controller',
                         'action' => 'userPosts',
-                    ],
-                ],
-            ],
-            'test_api.rest.company' => [
-                'type' => 'Segment',
-                'options' => [
-                    'route' => '/company[/:company_id]',
-                    'defaults' => [
-                        'controller' => 'test_api\\V1\\Rest\\Company\\Controller',
                     ],
                 ],
             ],
@@ -82,8 +82,8 @@ return [
             2 => 'test_api.rpc.user-import',
             3 => 'test_api.rest.posts',
             4 => 'test_api.rpc.posts-import',
-            5 => 'test_api.rpc.user-posts',
-            6 => 'test_api.rest.company',
+            5 => 'test_api.rest.company',
+            6 => 'test_api.rpc.user-posts',
         ],
     ],
     'zf-rest' => [
@@ -219,6 +219,9 @@ return [
                 0 => 'application/vnd.test_api.v1+json',
                 1 => 'application/json',
                 2 => 'application/*+json',
+                3 => 'application/vnd.test_api.v1+json',
+                4 => 'application/json',
+                5 => 'application/*+json',
             ],
             'test_api\\V1\\Rest\\Company\\Controller' => [
                 0 => 'application/vnd.test_api.v1+json',
@@ -250,6 +253,8 @@ return [
             'test_api\\V1\\Rpc\\UserPosts\\Controller' => [
                 0 => 'application/vnd.test_api.v1+json',
                 1 => 'application/json',
+                2 => 'application/vnd.test_api.v1+json',
+                3 => 'application/json',
             ],
             'test_api\\V1\\Rest\\Company\\Controller' => [
                 0 => 'application/vnd.test_api.v1+json',
@@ -352,6 +357,9 @@ return [
         ],
         'test_api\\V1\\Rest\\Company\\Controller' => [
             'input_filter' => 'test_api\\V1\\Rest\\Company\\Validator',
+        ],
+        'test_api\\V1\\Rpc\\UserPosts\\Controller' => [
+            'input_filter' => 'test_api\\V1\\Rpc\\UserPosts\\Validator',
         ],
     ],
     'input_filter_specs' => [
@@ -613,6 +621,34 @@ return [
                         ],
                     ],
                 ],
+            ],
+        ],
+        'test_api\\V1\\Rpc\\UserPosts\\Validator' => [
+            0 => [
+                'required' => true,
+                'validators' => [
+                    0 => [
+                        'name' => 'ZF\\ContentValidation\\Validator\\DbRecordExists',
+                        'options' => [
+                            'adapter' => 'db',
+                            'field' => 'userId',
+                            'table' => 'posts',
+                        ],
+                    ],
+                ],
+                'filters' => [
+                    0 => [
+                        'name' => \Zend\Filter\StripTags::class,
+                        'options' => [],
+                    ],
+                    1 => [
+                        'name' => \Zend\Filter\Digits::class,
+                        'options' => [],
+                    ],
+                ],
+                'name' => 'userId',
+                'field_type' => 'int',
+                'error_message' => 'userId not is required',
             ],
         ],
     ],

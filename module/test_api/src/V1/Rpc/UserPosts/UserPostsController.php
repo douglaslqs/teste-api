@@ -7,6 +7,7 @@ class UserPostsController extends AbstractActionController
 {
     public function userPostsAction()
     {
-    	$id = $this->params()->fromRoute('id'));
+    	$id = $this->params()->fromRoute('id');
+    	return array('id'=>$id);
     }
 }
