@@ -2,12 +2,23 @@
 namespace test_api\V1\Rpc\UserImport;
 
 use Zend\Mvc\Controller\AbstractActionController;
+use test_api\Service\ApiRequestService;
 
 class UserImportController extends AbstractActionController
 {
+	private $objApiRequest;
+
+	public function __construct(ApiRequestService $apiRequestService)
+	{
+		$this->objApiRequest = $apiRequestService;
+	}
+
     public function userImportAction()
     {
-    	$arrData = $this->callTestApiSource();
+    	$this->objApiRequest->setUri(ApiRequestService::URI_API_SOURCE.'users');
+		$arrData = $this->objApiRequest->request();
+		$arrResponse = array();
+		$arrResponseError = array();
     	foreach ($arrData as $key => $arrUser) {
     		//Normalized array address
 	    	$arrAddress = $arrUser['address'];
@@ -21,74 +32,24 @@ class UserImportController extends AbstractActionController
 	    	$arrCompany = $arrUser['company'];
 	    	unset($arrUser['company']);
 	    	$arrCompany['id_usuario'] = $arrUser['id'];
+	    	try {
+				$this->objApiRequest->setMethod(ApiRequestService::METHOD_POST);
 
-	    	//Verify user already
-	    	$userAlready = $this->callTestApi($arrUser['id'],'users','GET');
-	    	$arrStatus = array();
-	    	if (!isset($userAlready['id'])) {
-		    	//call api to save data
-		    	$this->callTestApi($arrUser, 'users');
-		    	$this->callTestApi($arrAddress, 'address');
-		    	$this->callTestApi($arrCompany, 'company');
+		    	$this->objApiRequest->setUri(ApiRequestService::URI_API.'users');
+		    	$this->objApiRequest->setParameters($arrUser);
+		    	$arrResponse[] = $this->objApiRequest->request();
+
+		    	$this->objApiRequest->setUri(ApiRequestService::URI_API.'address');
+	    		$this->objApiRequest->setParameters($arrAddress);
+				$arrResponse[] = $this->objApiRequest->request();
+
+		    	$this->objApiRequest->setUri(ApiRequestService::URI_API.'company');
+	    		$this->objApiRequest->setParameters($arrCompany);
+		    	$arrResponse[] = $this->objApiRequest->request();
+	    	} catch (Exception $e) {
+	    		$arrResponseError[] = $e->getMessage();
 	    	}
     	}
-    	return array('status'=>true);
-    }
-
-    /**
-     * Call test api to save data in specific route
-     * @param  array|string $data data to save or select
-     * @param  string $route route to save data
-     * @return [type]        [description]
-     */
-    private function callTestApi($data, $route, $method = 'POST')
-    {
-    	$uri = "http://test-api.local/";
-    	$uri .= !is_array($data) ? $route.'/'.$data : $route;
-
-    	$curl = curl_init();
-    	$arrOpt = array(
-		  CURLOPT_URL => $uri,
-		  CURLOPT_RETURNTRANSFER => true,
-		  CURLOPT_ENCODING => "",
-		  CURLOPT_MAXREDIRS => 10,
-		  CURLOPT_TIMEOUT => 0,
-		  CURLOPT_FOLLOWLOCATION => true,
-		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		  CURLOPT_CUSTOMREQUEST => $method,
-		);
-		if (is_array($data)) {
-			$arrOpt[CURLOPT_POSTFIELDS] = $data;
-		}
-		curl_setopt_array($curl, $arrOpt);
-
-		$response = curl_exec($curl);
-
-		curl_close($curl);
-		return json_decode($response, true);
-    }
-
-    /**
-     * Return data to import users
-     */
-    private function callTestApiSource()
-    {
-    	$curl = curl_init();
-
-		curl_setopt_array($curl, array(
-		  CURLOPT_URL => "http://test-api-source.local/users",
-		  CURLOPT_RETURNTRANSFER => true,
-		  CURLOPT_ENCODING => "",
-		  CURLOPT_MAXREDIRS => 10,
-		  CURLOPT_TIMEOUT => 0,
-		  CURLOPT_FOLLOWLOCATION => true,
-		  CURLOPT_HTTP_VERSION => CURL_HTTP_VERSION_1_1,
-		  CURLOPT_CUSTOMREQUEST => "GET",
-		));
-
-		$response = curl_exec($curl);
-		curl_close($curl);
-
-		return json_decode($response,true);
+    	return array('status'=>true, 'responseError' => $arrResponseError, 'response' => $arrResponse);
     }
 }

@@ -17,7 +17,8 @@ class ApiRequestService
     const METHOD_POST = 'POST';
     const METHOD_GET = 'GET';
 
-    const BASE_URL = 'http://test-api.local/';
+    const URI_API = 'http://test-api.local/';
+    const URI_API_SOURCE = 'http://test-api-source.local/';
 
 
     /**
@@ -35,16 +36,17 @@ class ApiRequestService
      */
     public function request()
     {
-        //$arrHeader = array('Authorization' => '123456');
-        $this->objRequest->setUri(self::BASE_URL.$this->getUri());
-        //$this->objRequest->setMethod($this->getMethod());
-        $arrHeader['Content-Type'] = 'application/json; charset=UTF-8';
+        $this->objRequest->setUri($this->getUri());
+        $this->objRequest->setMethod($this->getMethod());
+        $arrHeader = array();
         if ($this->getMethod() === self::METHOD_POST) {
+            $arrHeader['Content-Type'] = 'application/json';
             $this->objRequest->setPost(new Parameters($this->getParameters()));
+            $this->objClient->setRawBody(json_encode($this->getParameters()));
         } else {
+            $arrHeader['Accept'] = '*/*';
             $this->objRequest->setQuery(new Parameters($this->getParameters()));
         }
-
         $this->objRequest->getHeaders()->addHeaders($arrHeader);
         $response = $this->objClient->dispatch($this->objRequest);
         return json_decode($response->getBody(), true);

@@ -2,7 +2,7 @@
 return [
     'service_manager' => [
         'factories' => [
-            'test_api\\Service\\ApiRequestService'=>'test_api\\Service\\Factory\ApiRequestFactory'
+            \test_api\Service\ApiRequestService::class => \test_api\Service\Factory\ApiRequestFactory::class,
         ],
     ],
     'router' => [
@@ -54,6 +54,25 @@ return [
                     ],
                 ],
             ],
+            'test_api.rpc.user-posts' => [
+                'type' => 'Segment',
+                'options' => [
+                    'route' => '/users[/:id]/posts',
+                    'defaults' => [
+                        'controller' => 'test_api\\V1\\Rpc\\UserPosts\\Controller',
+                        'action' => 'userPosts',
+                    ],
+                ],
+            ],
+            'test_api.rest.company' => [
+                'type' => 'Segment',
+                'options' => [
+                    'route' => '/company[/:company_id]',
+                    'defaults' => [
+                        'controller' => 'test_api\\V1\\Rest\\Company\\Controller',
+                    ],
+                ],
+            ],
         ],
     ],
     'zf-versioning' => [
@@ -63,6 +82,8 @@ return [
             2 => 'test_api.rpc.user-import',
             3 => 'test_api.rest.posts',
             4 => 'test_api.rpc.posts-import',
+            5 => 'test_api.rpc.user-posts',
+            6 => 'test_api.rest.company',
         ],
     ],
     'zf-rest' => [
@@ -121,6 +142,7 @@ return [
                 1 => 'PATCH',
                 2 => 'PUT',
                 3 => 'DELETE',
+                4 => 'POST',
             ],
             'collection_http_methods' => [
                 0 => 'GET',
@@ -134,6 +156,28 @@ return [
             'collection_class' => \test_api\V1\Rest\Posts\PostsCollection::class,
             'service_name' => 'posts',
         ],
+        'test_api\\V1\\Rest\\Company\\Controller' => [
+            'listener' => 'test_api\\V1\\Rest\\Company\\CompanyResource',
+            'route_name' => 'test_api.rest.company',
+            'route_identifier_name' => 'company_id',
+            'collection_name' => 'company',
+            'entity_http_methods' => [
+                0 => 'GET',
+                1 => 'PATCH',
+                2 => 'PUT',
+                3 => 'DELETE',
+            ],
+            'collection_http_methods' => [
+                0 => 'GET',
+                1 => 'POST',
+            ],
+            'collection_query_whitelist' => [],
+            'page_size' => 25,
+            'page_size_param' => null,
+            'entity_class' => \test_api\V1\Rest\Company\CompanyEntity::class,
+            'collection_class' => \test_api\V1\Rest\Company\CompanyCollection::class,
+            'service_name' => 'company',
+        ],
     ],
     'zf-content-negotiation' => [
         'controllers' => [
@@ -142,6 +186,8 @@ return [
             'test_api\\V1\\Rpc\\UserImport\\Controller' => 'Json',
             'test_api\\V1\\Rest\\Posts\\Controller' => 'HalJson',
             'test_api\\V1\\Rpc\\PostsImport\\Controller' => 'Json',
+            'test_api\\V1\\Rpc\\UserPosts\\Controller' => 'Json',
+            'test_api\\V1\\Rest\\Company\\Controller' => 'HalJson',
         ],
         'accept_whitelist' => [
             'test_api\\V1\\Rest\\Address\\Controller' => [
@@ -169,6 +215,16 @@ return [
                 1 => 'application/json',
                 2 => 'application/*+json',
             ],
+            'test_api\\V1\\Rpc\\UserPosts\\Controller' => [
+                0 => 'application/vnd.test_api.v1+json',
+                1 => 'application/json',
+                2 => 'application/*+json',
+            ],
+            'test_api\\V1\\Rest\\Company\\Controller' => [
+                0 => 'application/vnd.test_api.v1+json',
+                1 => 'application/hal+json',
+                2 => 'application/json',
+            ],
         ],
         'content_type_whitelist' => [
             'test_api\\V1\\Rest\\Address\\Controller' => [
@@ -188,6 +244,14 @@ return [
                 1 => 'application/json',
             ],
             'test_api\\V1\\Rpc\\PostsImport\\Controller' => [
+                0 => 'application/vnd.test_api.v1+json',
+                1 => 'application/json',
+            ],
+            'test_api\\V1\\Rpc\\UserPosts\\Controller' => [
+                0 => 'application/vnd.test_api.v1+json',
+                1 => 'application/json',
+            ],
+            'test_api\\V1\\Rest\\Company\\Controller' => [
                 0 => 'application/vnd.test_api.v1+json',
                 1 => 'application/json',
             ],
@@ -231,6 +295,18 @@ return [
                 'route_identifier_name' => 'posts_id',
                 'is_collection' => true,
             ],
+            \test_api\V1\Rest\Company\CompanyEntity::class => [
+                'entity_identifier_name' => 'id',
+                'route_name' => 'test_api.rest.company',
+                'route_identifier_name' => 'company_id',
+                'hydrator' => \Zend\Hydrator\ArraySerializable::class,
+            ],
+            \test_api\V1\Rest\Company\CompanyCollection::class => [
+                'entity_identifier_name' => 'id',
+                'route_name' => 'test_api.rest.company',
+                'route_identifier_name' => 'company_id',
+                'is_collection' => true,
+            ],
         ],
     ],
     'zf-apigility' => [
@@ -258,6 +334,13 @@ return [
                 'entity_identifier_name' => 'id',
                 'table_service' => 'test_api\\V1\\Rest\\Posts\\PostsResource\\Table',
             ],
+            'test_api\\V1\\Rest\\Company\\CompanyResource' => [
+                'adapter_name' => 'db',
+                'table_name' => 'company',
+                'hydrator_name' => \Zend\Hydrator\ArraySerializable::class,
+                'controller_service_name' => 'test_api\\V1\\Rest\\Company\\Controller',
+                'entity_identifier_name' => 'id',
+            ],
         ],
     ],
     'zf-content-validation' => [
@@ -266,6 +349,9 @@ return [
         ],
         'test_api\\V1\\Rest\\Posts\\Controller' => [
             'input_filter' => 'test_api\\V1\\Rest\\Posts\\Validator',
+        ],
+        'test_api\\V1\\Rest\\Company\\Controller' => [
+            'input_filter' => 'test_api\\V1\\Rest\\Company\\Validator',
         ],
     ],
     'input_filter_specs' => [
@@ -442,12 +528,100 @@ return [
                 ],
             ],
         ],
+        'test_api\\V1\\Rest\\Company\\Validator' => [
+            0 => [
+                'name' => 'name',
+                'required' => true,
+                'filters' => [
+                    0 => [
+                        'name' => \Zend\Filter\StringTrim::class,
+                    ],
+                    1 => [
+                        'name' => \Zend\Filter\StripTags::class,
+                    ],
+                ],
+                'validators' => [
+                    0 => [
+                        'name' => \Zend\Validator\StringLength::class,
+                        'options' => [
+                            'min' => 1,
+                            'max' => '128',
+                        ],
+                    ],
+                ],
+            ],
+            1 => [
+                'name' => 'catchPhrase',
+                'required' => true,
+                'filters' => [
+                    0 => [
+                        'name' => \Zend\Filter\StringTrim::class,
+                    ],
+                    1 => [
+                        'name' => \Zend\Filter\StripTags::class,
+                    ],
+                ],
+                'validators' => [
+                    0 => [
+                        'name' => \Zend\Validator\StringLength::class,
+                        'options' => [
+                            'min' => 1,
+                            'max' => '128',
+                        ],
+                    ],
+                ],
+            ],
+            2 => [
+                'name' => 'bs',
+                'required' => true,
+                'filters' => [
+                    0 => [
+                        'name' => \Zend\Filter\StringTrim::class,
+                    ],
+                    1 => [
+                        'name' => \Zend\Filter\StripTags::class,
+                    ],
+                ],
+                'validators' => [
+                    0 => [
+                        'name' => \Zend\Validator\StringLength::class,
+                        'options' => [
+                            'min' => 1,
+                            'max' => '128',
+                        ],
+                    ],
+                ],
+            ],
+            3 => [
+                'name' => 'id_usuario',
+                'required' => true,
+                'filters' => [
+                    0 => [
+                        'name' => \Zend\Filter\StripTags::class,
+                    ],
+                    1 => [
+                        'name' => \Zend\Filter\Digits::class,
+                    ],
+                ],
+                'validators' => [
+                    0 => [
+                        'name' => 'ZF\\ContentValidation\\Validator\\DbRecordExists',
+                        'options' => [
+                            'adapter' => 'db',
+                            'table' => 'users',
+                            'field' => 'id',
+                        ],
+                    ],
+                ],
+            ],
+        ],
     ],
     'controllers' => [
         'factories' => [
             'test_api\\V1\\Rpc\\UserImport\\Controller' => \test_api\V1\Rpc\UserImport\UserImportControllerFactory::class,
             'test_api\\V1\\Rpc\\PostImport\\Controller' => 'test_api\\V1\\Rpc\\PostImport\\PostImportControllerFactory',
             'test_api\\V1\\Rpc\\PostsImport\\Controller' => \test_api\V1\Rpc\PostsImport\PostsImportControllerFactory::class,
+            'test_api\\V1\\Rpc\\UserPosts\\Controller' => \test_api\V1\Rpc\UserPosts\UserPostsControllerFactory::class,
         ],
     ],
     'zf-rpc' => [
@@ -464,6 +638,13 @@ return [
                 0 => 'GET',
             ],
             'route_name' => 'test_api.rpc.posts-import',
+        ],
+        'test_api\\V1\\Rpc\\UserPosts\\Controller' => [
+            'service_name' => 'UserPosts',
+            'http_methods' => [
+                0 => 'GET',
+            ],
+            'route_name' => 'test_api.rpc.user-posts',
         ],
     ],
 ];
