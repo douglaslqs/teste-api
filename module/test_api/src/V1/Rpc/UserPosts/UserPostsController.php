@@ -5,9 +5,15 @@ use Zend\Mvc\Controller\AbstractActionController;
 
 class UserPostsController extends AbstractActionController
 {
+	private $tablePosts;
+
+	public function __construct($tablePosts)
+	{
+		$this->tablePosts = $tablePosts;
+	}
+
     public function userPostsAction()
     {
-    	$id = $this->params()->fromRoute('id');
-    	return array('id'=>$id);
+    	return $this->tablePosts->fetch(array('userId'=>$this->params()->fromRoute('id')));
     }
 }

@@ -38,7 +38,7 @@ return [
             'test_api.rest.posts' => [
                 'type' => 'Segment',
                 'options' => [
-                    'route' => '/posts[/:posts_id]',
+                    'route' => '/posts[/:id]',
                     'defaults' => [
                         'controller' => 'test_api\\V1\\Rest\\Posts\\Controller',
                     ],
@@ -135,7 +135,7 @@ return [
         'test_api\\V1\\Rest\\Posts\\Controller' => [
             'listener' => 'test_api\\V1\\Rest\\Posts\\PostsResource',
             'route_name' => 'test_api.rest.posts',
-            'route_identifier_name' => 'posts_id',
+            'route_identifier_name' => 'id',
             'collection_name' => 'posts',
             'entity_http_methods' => [
                 0 => 'GET',
@@ -291,13 +291,13 @@ return [
             \test_api\V1\Rest\Posts\PostsEntity::class => [
                 'entity_identifier_name' => 'id',
                 'route_name' => 'test_api.rest.posts',
-                'route_identifier_name' => 'posts_id',
+                'route_identifier_name' => 'id',
                 'hydrator' => \Zend\Hydrator\ArraySerializable::class,
             ],
             \test_api\V1\Rest\Posts\PostsCollection::class => [
                 'entity_identifier_name' => 'id',
                 'route_name' => 'test_api.rest.posts',
-                'route_identifier_name' => 'posts_id',
+                'route_identifier_name' => 'id',
                 'is_collection' => true,
             ],
             \test_api\V1\Rest\Company\CompanyEntity::class => [
@@ -330,6 +330,7 @@ return [
                 'hydrator_name' => \Zend\Hydrator\ArraySerializable::class,
                 'controller_service_name' => 'test_api\\V1\\Rest\\Users\\Controller',
                 'entity_identifier_name' => 'id',
+                'table_service' => 'test_api\\V1\\Rest\\Users\\UsersResource\\Table',
             ],
             'test_api\\V1\\Rest\\Posts\\PostsResource' => [
                 'adapter_name' => 'db',
@@ -472,28 +473,6 @@ return [
         ],
         'test_api\\V1\\Rest\\Posts\\Validator' => [
             0 => [
-                'name' => 'userId',
-                'required' => true,
-                'filters' => [
-                    0 => [
-                        'name' => \Zend\Filter\StripTags::class,
-                    ],
-                    1 => [
-                        'name' => \Zend\Filter\Digits::class,
-                    ],
-                ],
-                'validators' => [
-                    0 => [
-                        'name' => 'ZF\\ContentValidation\\Validator\\DbRecordExists',
-                        'options' => [
-                            'adapter' => 'db',
-                            'table' => 'users',
-                            'field' => 'id',
-                        ],
-                    ],
-                ],
-            ],
-            1 => [
                 'name' => 'title',
                 'required' => true,
                 'filters' => [
@@ -514,7 +493,7 @@ return [
                     ],
                 ],
             ],
-            2 => [
+            1 => [
                 'name' => 'body',
                 'required' => true,
                 'filters' => [
