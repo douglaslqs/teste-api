@@ -120,10 +120,14 @@ return [
                 1 => 'PATCH',
                 2 => 'PUT',
                 3 => 'DELETE',
+                4 => 'POST',
             ],
             'collection_http_methods' => [
                 0 => 'GET',
                 1 => 'POST',
+                2 => 'PUT',
+                3 => 'PATCH',
+                4 => 'DELETE',
             ],
             'collection_query_whitelist' => [],
             'page_size' => 25,
@@ -388,7 +392,7 @@ return [
             ],
             1 => [
                 'name' => 'username',
-                'required' => true,
+                'required' => false,
                 'filters' => [
                     0 => [
                         'name' => \Zend\Filter\StringTrim::class,

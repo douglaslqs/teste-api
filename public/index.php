@@ -7,6 +7,9 @@
 use Zend\Stdlib\ArrayUtils;
 use ZF\Apigility\Application;
 
+header('Access-Control-Allow-Origin: *');
+header('Access-Control-Allow-Headers: Cache-Control, Origin, Content-Type, Authorization');
+
 /**
  * This makes our life easier when dealing with paths. Everything is relative
  * to the application root now.
