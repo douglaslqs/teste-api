@@ -32,6 +32,7 @@ O projeto teve como foco principal a sua arquitetura, permitindo que ele tenha s
 
 ## Collections postman:
 > https://www.getpostman.com/collections/fe84465b0422a4d92281
+ou importe o arquivo `test-api/data/Catalogo Usuarios.postman_collection.json`
 
 ## Github:
 > api-resource: https://github.com/douglaslqs/teste-api-resource
